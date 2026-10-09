@@ -18,7 +18,7 @@ import com.appsdeveloperblog.ws.emailnotification.error.RetryableException;
 import com.appsdeveloperblog.ws.emailnotification.event.ProductCreatedEvent;
 
 @Component
-@KafkaListener(topics="product-created-events-topic")
+@KafkaListener(topics="product-created-events-topic", concurrency="3")
 public class ProductCreatedEventHandler {
 	
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -37,7 +37,8 @@ public class ProductCreatedEventHandler {
 //		if (true) {
 //			throw new NotRetryableException("An error took place. No need to consume this message again.");
 //		}
-		LOGGER.info("Received a new event: {}", productCreatedEvent.getTitle());
+		LOGGER.info("Received a new event: {} with productId: {}", productCreatedEvent.getTitle(),
+				productCreatedEvent.getProductId());
 		
 		//test RetryableException
 		try {
