@@ -3,6 +3,7 @@ package com.appsdeveloperblog.ws.products.service;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.Uuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +34,26 @@ public class ProductServiceImpl implements ProductService {
 				productRestModel.getTitle(), productRestModel.getPrice(),
 				productRestModel.getQuantity());
 		
-		//send the event asynchronously
-		CompletableFuture<SendResult<String, Object>> future = 
-				kafkaTemplate.send("product-created-events-topic", productId, productCreatedEvent);
+		//Created a ProducerRecord to added a parameter in the headers
+		ProducerRecord<String, Object> record = new ProducerRecord<>(
+				"product-created-events-topic",
+				productId,
+				productCreatedEvent);
+		
+		//Added messageId in the headers for idempotent check
+		record.headers().add("messageId", Uuid.randomUuid().toString().getBytes());
+//		record.headers().add("messageId", "123".getBytes());
+		
+		CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(record);
 		
 		future.whenComplete((result, exception) -> {
 			if (exception != null) {
 				LOGGER.error("********** Failed to send message: " + exception.getMessage());
 			} else {
 				LOGGER.info("********** Message sent successfully: " + result.getRecordMetadata());
+				LOGGER.info("Partition: " + result.getRecordMetadata().partition());
+				LOGGER.info("Topic: " + result.getRecordMetadata().topic());
+				LOGGER.info("Offset: " + result.getRecordMetadata().offset());
 			}
 		});
 		
