@@ -21,6 +21,13 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
+import org.springframework.util.backoff.FixedBackOff;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import com.appsdeveloperblog.ws.emailnotification.error.NotRetryableException;
+import com.appsdeveloperblog.ws.emailnotification.error.RetryableException;
+
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 
@@ -58,7 +65,10 @@ public class KafkaConsumerConfiguration {
 	ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
 			ConsumerFactory<String, Object> consumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
 		
-		DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate));
+		DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate),
+				new FixedBackOff(5000,3));
+		errorHandler.addNotRetryableExceptions(NotRetryableException.class);
+		errorHandler.addRetryableExceptions(RetryableException.class);
 		
 		ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory);
@@ -80,6 +90,11 @@ public class KafkaConsumerConfiguration {
 		config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		
 		return new DefaultKafkaProducerFactory<>(config);
+	}
+	
+	@Bean
+	RestTemplate getRestTemplate() {
+		return new RestTemplate();
 	}
 	
 }
