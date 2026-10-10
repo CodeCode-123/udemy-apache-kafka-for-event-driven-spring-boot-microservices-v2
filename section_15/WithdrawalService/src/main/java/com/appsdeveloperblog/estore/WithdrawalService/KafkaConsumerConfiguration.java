@@ -2,6 +2,7 @@ package com.appsdeveloperblog.estore.WithdrawalService;
 
 import java.util.HashMap;
 
+
 import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -48,6 +49,11 @@ public class KafkaConsumerConfiguration {
 		config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
 		config.put(JacksonJsonDeserializer.TRUSTED_PACKAGES,
 				environment.getProperty("spring.kafka.consumer.properties.spring.json.trusted.packages"));
+		config.put(JacksonJsonDeserializer.TYPE_MAPPINGS, 
+				environment.getProperty("spring.kafka.consumer.properties.spring.json.type.mapping"));
+		
+		config.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG,
+				environment.getProperty("spring.kafka.consumer.isolation-level", "READ_COMMITTED").toLowerCase());
 
 		return new DefaultKafkaConsumerFactory<>(config);
 	}

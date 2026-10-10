@@ -17,7 +17,7 @@ public class WithdrawalRequestedEventHandler {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @KafkaHandler
-    public void handle(@Payload WithdrawalRequestedEvent withdrawalRequestedEvent) {
+    public void handle(WithdrawalRequestedEvent withdrawalRequestedEvent) {
         LOGGER.info("Received a new withdrawal event: {} ", withdrawalRequestedEvent.getAmount());
     }
 }

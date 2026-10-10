@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.appsdeveloperblog.estore.transfers.error.TransferServiceException;
@@ -32,6 +33,11 @@ public class TransferServiceImpl implements TransferService {
 		this.restTemplate = restTemplate;
 	}
 
+	//spring framework transaction, not Kafka specific, 
+	//rollbackFor will not overwrite the rollback for other unchecked exceptions
+	//noRollbackFor will not rollback for defined exceptions
+//	@Transactional(value="kafkaTransactionManager", rollbackFor = {TransferServiceException.class}) 
+	@Transactional
 	@Override
 	public boolean transfer(TransferRestModel transferRestModel) {
 		WithdrawalRequestedEvent withdrawalEvent = new WithdrawalRequestedEvent(transferRestModel.getSenderId(),
@@ -54,7 +60,25 @@ public class TransferServiceImpl implements TransferService {
 			LOGGER.error(ex.getMessage(), ex);
 			throw new TransferServiceException(ex);
 		}
-
+		
+//		//local transactions
+//		boolean returnValue = kafkaTemplate.executeInTransaction(t -> {
+//			t.send("withdraw-money-topic", withdrawalEvent);
+//			LOGGER.info("Sent event to withdrawal topic.");
+//
+//			// Business logic that causes and error
+//			try {
+//				callRemoteServce();
+//			} catch (Exception ex) {
+//				LOGGER.error(ex.getMessage(), ex);
+//				throw new TransferServiceException(ex);
+//			}
+//			
+//			t.send("deposit-money-topic", depositEvent);
+//			LOGGER.info("Sent event to deposit topic");
+//			return true;
+//		});		
+		
 		return true;
 	}
 
