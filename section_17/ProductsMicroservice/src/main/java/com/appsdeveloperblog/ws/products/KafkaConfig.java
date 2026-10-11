@@ -14,6 +14,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
+import com.appsdeveloperblog.ws.products.service.ProductServiceImpl;
+
 
 
 @Configuration
@@ -81,6 +83,11 @@ public class KafkaConfig {
 				.replicas(3)
 				.config("min.insync.replicas", "2")
 				.build();
+	}
+	
+	@Bean
+	ProductServiceImpl getProductServiceImpl(KafkaTemplate<String, Object> kafkaTemplate) {
+		return new ProductServiceImpl(kafkaTemplate);
 	}
 
 }

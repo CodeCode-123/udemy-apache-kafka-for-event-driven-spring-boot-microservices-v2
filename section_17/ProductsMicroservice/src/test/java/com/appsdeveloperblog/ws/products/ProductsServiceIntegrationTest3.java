@@ -26,6 +26,7 @@ import org.springframework.kafka.test.condition.EmbeddedKafkaCondition;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.appsdeveloperblog.ws.products.rest.CreateProductRestModel;
 import com.appsdeveloperblog.ws.products.service.ProductCreatedEvent;
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @EmbeddedKafka(topics = ProductsServiceIntegrationTest3.TEMPLATE_TOPIC)
-@SpringBootTest(properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}", classes=ProductsMicroserviceApplication.class)
+@SpringBootTest(properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}", classes=KafkaConfig.class)
 public class ProductsServiceIntegrationTest3 {
 	
 	@Autowired
