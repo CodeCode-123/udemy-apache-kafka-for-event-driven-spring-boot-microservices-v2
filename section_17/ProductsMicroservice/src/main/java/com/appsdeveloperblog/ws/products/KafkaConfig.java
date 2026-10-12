@@ -85,9 +85,9 @@ public class KafkaConfig {
 				.build();
 	}
 	
-	@Bean
-	ProductServiceImpl getProductServiceImpl(KafkaTemplate<String, Object> kafkaTemplate) {
-		return new ProductServiceImpl(kafkaTemplate);
-	}
+//	@Bean
+//	ProductServiceImpl getProductServiceImpl(KafkaTemplate<String, Object> kafkaTemplate) {
+//		return new ProductServiceImpl(kafkaTemplate);
+//	}
 
 }

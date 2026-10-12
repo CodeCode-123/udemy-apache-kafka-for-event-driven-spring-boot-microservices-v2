@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -17,10 +18,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -31,7 +30,6 @@ import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -42,8 +40,8 @@ import com.appsdeveloperblog.ws.products.service.ProductService;
 @DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test") //application-test.properties
-@EmbeddedKafka(partitions=3, count=3, controlledShutdown=true, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
-@SpringBootTest //(properties="spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}")
+@EmbeddedKafka(partitions=3, count=1, controlledShutdown=true)
+@SpringBootTest(properties="spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}")
 public class ProductsServiceIntegrationTest {
 	
 	@Autowired
@@ -57,12 +55,11 @@ public class ProductsServiceIntegrationTest {
 	
 	private KafkaMessageListenerContainer<String, ProductCreatedEvent> container;
 	private BlockingQueue<ConsumerRecord<String, ProductCreatedEvent>> records;
-	
 
 	@BeforeAll
 	void setUp() {
 		DefaultKafkaConsumerFactory<String, Object> consumerFactory = new DefaultKafkaConsumerFactory<>(getConsumerProperties());
-				
+
 		ContainerProperties containerProperties = new ContainerProperties(environment.getProperty("product-created-events-topic-name"));
 		container = new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
 		records = new LinkedBlockingQueue<>();
@@ -85,12 +82,13 @@ public class ProductsServiceIntegrationTest {
 		
 		// Act
 		productService.createProduct(createProductRestModel);
-		
+
 		// Assert
 		ConsumerRecord<String, ProductCreatedEvent> message = records.poll(3000, TimeUnit.MILLISECONDS);
+
 		assertNotNull(message);
 		assertNotNull(message.key());
-		ProductCreatedEvent productCreatedEvent = message.value();
+		ProductCreatedEvent productCreatedEvent = (ProductCreatedEvent) message.value();
 		assertEquals(createProductRestModel.getQuantity(), productCreatedEvent.getQuantity());
 		assertEquals(createProductRestModel.getTitle(), productCreatedEvent.getTitle());
 		assertEquals(createProductRestModel.getPrice(), productCreatedEvent.getPrice());
@@ -112,5 +110,4 @@ public class ProductsServiceIntegrationTest {
 	void tearDown() {
 		container.stop();
 	}
-
 }
