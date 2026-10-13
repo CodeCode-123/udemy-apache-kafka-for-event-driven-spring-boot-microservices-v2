@@ -16,4 +16,14 @@ public class OrderCreatedEvent {
     private UUID customerId;
     private UUID productId;
     private Integer productQuantity;
+
+    @Override
+    public String toString() {
+        return "OrderCreatedEvent{" +
+                "orderId=" + orderId +
+                ", customerId=" + customerId +
+                ", productId=" + productId +
+                ", productQuantity=" + productQuantity +
+                '}';
+    }
 }

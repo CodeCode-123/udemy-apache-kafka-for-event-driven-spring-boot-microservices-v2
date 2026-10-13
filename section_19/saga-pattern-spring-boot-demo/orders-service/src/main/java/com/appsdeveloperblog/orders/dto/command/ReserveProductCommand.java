@@ -15,4 +15,13 @@ public class ReserveProductCommand {
     private UUID productId;
     private Integer productQuantity;
     private UUID orderId;
+
+    @Override
+    public String toString() {
+        return "ReserveProductCommand{" +
+                "productId=" + productId +
+                ", productQuantity=" + productQuantity +
+                ", orderId=" + orderId +
+                '}';
+    }
 }
