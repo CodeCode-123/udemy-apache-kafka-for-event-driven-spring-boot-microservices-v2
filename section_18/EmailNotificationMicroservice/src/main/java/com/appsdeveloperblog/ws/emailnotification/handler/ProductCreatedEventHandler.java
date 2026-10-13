@@ -44,7 +44,7 @@ public class ProductCreatedEventHandler {
 
 	@Transactional
 	@KafkaHandler
-	public void handler(@Payload ProductCreatedEvent productCreatedEvent,
+	public void handle(@Payload ProductCreatedEvent productCreatedEvent,
 			            @Header("messageId") String messageId,
 			            @Header(KafkaHeaders.RECEIVED_KEY) String messageKey) {
 
