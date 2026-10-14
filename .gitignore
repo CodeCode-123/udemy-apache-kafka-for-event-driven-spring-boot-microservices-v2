@@ -19,6 +19,8 @@ buildNumber.properties
 *.iml
 .vscode/
 .settings/
+data/
+**/data/
 
 # Build and Target Outputs
 build/

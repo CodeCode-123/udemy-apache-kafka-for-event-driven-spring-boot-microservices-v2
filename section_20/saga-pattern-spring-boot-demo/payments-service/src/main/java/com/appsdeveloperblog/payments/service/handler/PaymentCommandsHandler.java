@@ -4,6 +4,7 @@ import com.appsdeveloperblog.payments.dto.Payment;
 import com.appsdeveloperblog.payments.dto.command.ProcessPaymentCommand;
 import com.appsdeveloperblog.payments.dto.event.PaymentFailedEvent;
 import com.appsdeveloperblog.payments.dto.event.PaymentProcessedEvent;
+import com.appsdeveloperblog.payments.exceptions.CreditCardProcessorUnavailableException;
 import com.appsdeveloperblog.payments.service.PaymentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,6 @@ public class PaymentCommandsHandler {
     @KafkaHandler
     public void handleCommand(ProcessPaymentCommand command) {
         logger.info("ProcessPaymentCommand: {}", command.toString());
-
         try {
             Payment payment = new Payment(
                     command.getOrderId(),
@@ -46,8 +46,7 @@ public class PaymentCommandsHandler {
                     processedPayment.getId()
             );
             kafkaTemplate.send(paymentEventsTopicName, paymentProcessedEvent);
-
-        } catch (Exception e) {
+        } catch (CreditCardProcessorUnavailableException e) {
             logger.error(e.getLocalizedMessage(), e);
             PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
                     command.getOrderId(),

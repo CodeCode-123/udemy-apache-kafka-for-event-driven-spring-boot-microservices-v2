@@ -1,6 +1,7 @@
 package com.appsdeveloperblog.orders.service.handler;
 
 import com.appsdeveloperblog.orders.dto.command.ApproveOrderCommand;
+import com.appsdeveloperblog.orders.dto.command.RejectOrderCommand;
 import com.appsdeveloperblog.orders.dto.event.OrderApprovedEvent;
 import com.appsdeveloperblog.orders.service.OrderService;
 import org.aspectj.weaver.ast.Or;
@@ -27,5 +28,11 @@ public class OrderCommandsHandler {
     public void handleCommand(ApproveOrderCommand command) {
         logger.info("ApproveOrderCommand: {}", command.toString());
         orderService.approveOrder(command.getOrderId());
+    }
+
+    @KafkaHandler
+    public void handleCommand(RejectOrderCommand command) {
+        logger.info("RejectOrderCommand: {}", command);
+        orderService.rejectOrder(command.getOrderId());
     }
 }
