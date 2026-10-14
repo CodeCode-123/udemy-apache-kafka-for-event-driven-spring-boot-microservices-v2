@@ -21,6 +21,7 @@ buildNumber.properties
 .settings/
 data/
 **/data/
+volumes/
 
 # Build and Target Outputs
 build/
